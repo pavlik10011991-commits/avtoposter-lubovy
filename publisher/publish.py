@@ -367,15 +367,8 @@ class Instagram:
         return self.req("POST", f"{self.user}/media", **params)["id"]
 
     def video_container(self, video: Path, **params) -> str:
-        """Видео грузим напрямую (resumable upload), ссылка не нужна."""
-        cid = self.req("POST", f"{self.user}/media", upload_type="resumable", **params)["id"]
-        data = video.read_bytes()
-        r = requests.post(f"https://rupload.facebook.com/ig-api-upload/{IG_API}/{cid}", data=data, timeout=600,
-                          headers={"Authorization": f"OAuth {self.token}", "offset": "0",
-                                   "file_size": str(len(data))})
-        if r.status_code >= 300:
-            raise RuntimeError(f"Instagram загрузка видео: {r.text[:300]}")
-        return cid
+        """Видео отдаём Инстаграму по открытой ссылке на файл в репозитории (graph.instagram.com требует video_url)."""
+        return self.container(video_url=self.url_for(video), **params)
 
     def wait(self, cid: str, timeout: int = 600) -> None:
         start = time.time()
