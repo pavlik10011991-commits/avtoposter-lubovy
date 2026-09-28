@@ -1,0 +1,50 @@
+name: Сборка картинок
+
+on:
+  workflow_dispatch:
+    inputs:
+      week:
+        description: "Дата из имени файлов content/*_ДАТА.py, например 2026-09-29"
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: autoposter
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      FONTS_DIR: ${{ github.workspace }}/.fonts
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install playwright pillow && python -m playwright install --with-deps chromium
+      - name: Шрифты
+        run: |
+          mkdir -p .fonts && cd .fonts
+          for p in oswald pt-serif montserrat; do npm pack @fontsource/$p --silent >/dev/null && tar xzf fontsource-$p-*.tgz && mv package $p; done
+      - name: Карусели, обложки ТГ, сторис
+        run: |
+          W="${{ github.event.inputs.week }}"
+          n=0
+          if [ -f content/carousels_$W.py ]; then python content/render_carousels.py --src carousels_$W.py; n=1; fi
+          if [ -f content/tg_$W.py ]; then python content/render_carousels.py --src tg_$W.py; n=1; fi
+          if [ -f content/stories_$W.py ]; then python content/render_stories.py --src stories_$W.py; n=1; fi
+          if [ $n = 0 ]; then echo "::error::Нет файлов content/*_$W.py"; exit 1; fi
+          if [ -f content/pinned.py ] && [ ! -d media/pinned ]; then python content/render_carousels.py --src pinned.py; fi
+      - name: Сохранить в репозиторий
+        run: |
+          git config user.name "autoposter"
+          git config user.email "autoposter@users.noreply.github.com"
+          git add media
+          git diff --cached --quiet && exit 0
+          git commit -m "картинки недели ${{ github.event.inputs.week }}"
+          for i in 1 2 3; do git pull --rebase -q && git push -q && exit 0; sleep 5; done
+          exit 1

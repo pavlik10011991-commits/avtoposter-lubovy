@@ -1,0 +1,4 @@
+requests>=2.31
+telethon>=1.36
+pillow>=10
+
