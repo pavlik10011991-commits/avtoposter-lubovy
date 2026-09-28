@@ -8,7 +8,7 @@ on:
       mode:
         description: "Режим"
         type: choice
-        options: [publish, check, check-setup]
+        options: [publish, check, check-setup, publish-loop]
         default: check
       only_id:
         description: "id строки — опубликовать только её прямо сейчас (для теста)"
@@ -24,7 +24,7 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 350
     env:
       MAX_LATE_HOURS: "24"
       TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
@@ -63,6 +63,23 @@ jobs:
           else
             python publisher/publish.py
           fi
+
+      - name: Публикация по расписанию в течение 5,5 часов (publish-loop)
+        if: github.event.inputs.mode == 'publish-loop'
+        run: |
+          git config user.name "autoposter"
+          git config user.email "autoposter@users.noreply.github.com"
+          end=$(( $(date +%s) + 19800 ))
+          while [ $(date +%s) -lt $end ]; do
+            python publisher/publish.py || true
+            git add status.csv
+            if ! git diff --cached --quiet; then
+              git commit -qm "журнал: $(date -u +'%Y-%m-%d %H:%M') UTC"
+              for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done
+            fi
+            python publisher/publish.py --check | grep -q "Дальше по расписанию: 0" && break
+            sleep 240
+          done
 
       - name: Сохранить журнал публикаций
         if: always() && (github.event_name == 'schedule' || github.event.inputs.mode == 'publish')
