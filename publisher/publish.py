@@ -373,7 +373,14 @@ class Instagram:
     def wait(self, cid: str, timeout: int = 600) -> None:
         start = time.time()
         while time.time() - start < timeout:
-            st = self.req("GET", cid, fields="status_code,status").get("status_code")
+            try:
+                st = self.req("GET", cid, fields="status_code,status").get("status_code")
+            except RuntimeError as e:
+                # сразу после создания Инстаграм иногда ещё «не видит» контейнер (код 24) — ждём и спрашиваем снова
+                if "(код 24)" in str(e) and time.time() - start < 120:
+                    time.sleep(5)
+                    continue
+                raise
             if st == "FINISHED":
                 return
             if st in ("ERROR", "EXPIRED"):
