@@ -1,0 +1,43 @@
+name: Нарезка из Loom
+on:
+  workflow_dispatch:
+    inputs:
+      spec:
+        description: "id:старт-конец,старт-конец;id:... (секунды)"
+        required: true
+permissions:
+  contents: write
+jobs:
+  cut:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: yt-dlp
+        run: pip install -q yt-dlp && sudo apt-get -qq install -y ffmpeg >/dev/null
+      - name: Нарезка
+        env:
+          SPEC: ${{ inputs.spec }}
+        run: |
+          mkdir -p media/loom
+          IFS=';' read -ra VIDS <<< "$SPEC"
+          for v in "${VIDS[@]}"; do
+            id="${v%%:*}"; ranges="${v#*:}"
+            IFS=',' read -ra RS <<< "$ranges"
+            for r in "${RS[@]}"; do
+              s="${r%-*}"; e="${r#*-}"
+              out="media/loom/${id:0:4}_${s}-${e}.mp4"
+              yt-dlp -q -f "bv*[height<=1080]/bv*/b" --download-sections "*${s}-${e}" --force-keyframes-at-cuts \
+                --remux-video mp4 -o "tmp_${id:0:4}_${s}.%(ext)s" "https://www.loom.com/share/$id" || { echo "FAIL $id $r"; continue; }
+              f=$(ls tmp_${id:0:4}_${s}.* | head -1)
+              ffmpeg -loglevel error -y -i "$f" -an -c:v libx264 -preset veryfast -crf 23 -pix_fmt yuv420p -movflags +faststart "$out"
+              rm -f "$f"; ls -la "$out"
+            done
+          done
+      - name: Сохранить
+        run: |
+          git config user.name "autoposter"
+          git config user.email "autoposter@users.noreply.github.com"
+          git add media/loom
+          git commit -qm "Нарезка из Loom" || exit 0
+          for i in 1 2 3; do git pull --rebase -q && git push -q && exit 0; sleep 5; done
