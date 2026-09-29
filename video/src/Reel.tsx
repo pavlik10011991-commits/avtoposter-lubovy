@@ -2,10 +2,14 @@ import React from 'react';
 import {AbsoluteFill, Img, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 
 const fonts = `
-@font-face{font-family:Oswald;font-weight:700;src:url(${staticFile('oswald-cyrillic-700-normal.woff2')})}
-@font-face{font-family:Montserrat;font-weight:700;src:url(${staticFile('montserrat-cyrillic-700-normal.woff2')})}
-@font-face{font-family:Montserrat;font-weight:500;src:url(${staticFile('montserrat-cyrillic-500-normal.woff2')})}
-@font-face{font-family:'PT Serif';font-style:italic;src:url(${staticFile('pt-serif-cyrillic-400-italic.woff2')})}`;
+@font-face{font-family:Oswald;font-weight:700;src:url(${staticFile('oswald-latin-700-normal.woff2')})}
+@font-face{font-family:Oswald;font-weight:700;src:url(${staticFile('oswald-cyrillic-700-normal.woff2')});unicode-range:U+0400-04FF,U+2116}
+@font-face{font-family:Montserrat;font-weight:700;src:url(${staticFile('montserrat-latin-700-normal.woff2')})}
+@font-face{font-family:Montserrat;font-weight:700;src:url(${staticFile('montserrat-cyrillic-700-normal.woff2')});unicode-range:U+0400-04FF,U+2116}
+@font-face{font-family:Montserrat;font-weight:500;src:url(${staticFile('montserrat-latin-500-normal.woff2')})}
+@font-face{font-family:Montserrat;font-weight:500;src:url(${staticFile('montserrat-cyrillic-500-normal.woff2')});unicode-range:U+0400-04FF,U+2116}
+@font-face{font-family:'PT Serif';font-style:italic;src:url(${staticFile('pt-serif-latin-400-italic.woff2')})}
+@font-face{font-family:'PT Serif';font-style:italic;src:url(${staticFile('pt-serif-cyrillic-400-italic.woff2')});unicode-range:U+0400-04FF,U+2116}`;
 
 type Scene = {photo: string; label: string; head: string; sub: string};
 export const reelSchemaDefaults = {
