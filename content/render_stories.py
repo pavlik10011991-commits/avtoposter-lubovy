@@ -44,7 +44,8 @@ def main():
         for d in m.DAYS:
             global PILL; PILL = d.get("pill", "СЕГОДНЯ В 19:00")
             out = ROOT / "media" / d["date"]; out.mkdir(parents=True, exist_ok=True)
-            items = [(f"story_{i+1}", st["text"], st["photo"], st.get("pill", False)) for i, st in enumerate(d["stories"])] if "stories" in d else \
+            pref = d.get("prefix", "story")
+            items = [(f"{pref}_{i+1}", st["text"], st["photo"], st.get("pill", False)) for i, st in enumerate(d["stories"])] if "stories" in d else \
                     [("story_1_wish", d["wish"], d["wish_photo"], False), ("story_2_topic", d["topic"], d["topic_photo"], True)]
             for name, text, photo, topic in items:
                 d.setdefault(name, None)
