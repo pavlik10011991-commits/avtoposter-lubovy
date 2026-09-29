@@ -19,6 +19,7 @@ jobs:
         env:
           SPEC: ${{ inputs.spec }}
         run: |
+          set +e -x
           mkdir -p media/loom; LOG=media/loom/log.txt; : > $LOG
           IFS=';' read -ra VIDS <<< "$SPEC"
           for v in "${VIDS[@]}"; do
@@ -48,7 +49,9 @@ jobs:
             done
           done
           cat $LOG
+          exit 0
       - name: Сохранить
+        if: always()
         run: |
           git config user.name "autoposter"
           git config user.email "autoposter@users.noreply.github.com"
