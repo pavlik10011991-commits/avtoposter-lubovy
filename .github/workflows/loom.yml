@@ -19,7 +19,7 @@ jobs:
         env:
           SPEC: ${{ inputs.spec }}
         run: |
-          set +e -x
+          set +e
           mkdir -p media/loom; LOG=media/loom/log.txt; : > $LOG
           IFS=';' read -ra VIDS <<< "$SPEC"
           for v in "${VIDS[@]}"; do
