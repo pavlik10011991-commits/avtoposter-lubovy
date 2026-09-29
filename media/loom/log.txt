@@ -1,0 +1,37 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+3e97bb53faf846f9aae8d04b45d5e15d raw-url ok
+-rw-r--r-- 1 runner runner 4865255 Sep 29 15:37 media/loom/3e97_0-20.mp4
+-rw-r--r-- 1 runner runner 5809660 Sep 29 15:38 media/loom/3e97_85-165.mp4
+-rw-r--r-- 1 runner runner 1275545 Sep 29 15:38 media/loom/3e97_265-285.mp4
+-rw-r--r-- 1 runner runner 3348458 Sep 29 15:38 media/loom/3e97_505-545.mp4
+-rw-r--r-- 1 runner runner 15345437 Sep 29 15:39 media/loom/3e97_925-1010.mp4
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/usr/lib/python3.12/json/__init__.py", line 293, in load
+    return loads(fp.read(),
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+334e075dbd35449c82a56b9172817fce raw-url ok
+-rw-r--r-- 1 runner runner 2201583 Sep 29 15:39 media/loom/334e_295-335.mp4
+-rw-r--r-- 1 runner runner 8187245 Sep 29 15:39 media/loom/334e_535-605.mp4
