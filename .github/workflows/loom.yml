@@ -14,26 +14,40 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: yt-dlp
-        run: pip install -q yt-dlp && sudo apt-get -qq install -y ffmpeg >/dev/null
+        run: sudo apt-get -qq install -y ffmpeg >/dev/null
       - name: Нарезка
         env:
           SPEC: ${{ inputs.spec }}
         run: |
-          mkdir -p media/loom
+          mkdir -p media/loom; LOG=media/loom/log.txt; : > $LOG
           IFS=';' read -ra VIDS <<< "$SPEC"
           for v in "${VIDS[@]}"; do
             id="${v%%:*}"; ranges="${v#*:}"
+            url=""
+            for ep in transcoded-url raw-url; do
+              u=$(curl -s -X POST "https://www.loom.com/api/campaigns/sessions/$id/$ep" -H 'content-type: application/json' \
+                  -d '{"anonID":null,"deviceID":null,"force_original":false,"password":null}' | python3 -c "import json,sys;print(json.load(sys.stdin).get('url',''))" 2>>$LOG)
+              [ -n "$u" ] && { url="$u"; echo "$id $ep ok" >> $LOG; break; }
+            done
+            [ -z "$url" ] && { echo "$id: no url" >> $LOG; continue; }
+            if [[ "$url" == *.m3u8* ]]; then
+              base="${url%%\?*}"; base="${base%/*}"; q="?${url#*\?}"
+              curl -s "$url" > master.m3u8
+              vpl=$(grep -v '^#' master.m3u8 | grep video | tail -1)
+              curl -s "$base/$vpl$q" | sed -E "s#^([^#].*)#$base/\1$q#" > video.m3u8
+              src=video.m3u8; opts="-protocol_whitelist file,https,tcp,tls,crypto -allowed_extensions ALL"
+            else
+              src="$url"; opts=""
+            fi
             IFS=',' read -ra RS <<< "$ranges"
             for r in "${RS[@]}"; do
               s="${r%-*}"; e="${r#*-}"
               out="media/loom/${id:0:4}_${s}-${e}.mp4"
-              yt-dlp -q -f "bv*[height<=1080]/bv*/b" --download-sections "*${s}-${e}" --force-keyframes-at-cuts \
-                --remux-video mp4 -o "tmp_${id:0:4}_${s}.%(ext)s" "https://www.loom.com/share/$id" || { echo "FAIL $id $r"; continue; }
-              f=$(ls tmp_${id:0:4}_${s}.* | head -1)
-              ffmpeg -loglevel error -y -i "$f" -an -c:v libx264 -preset veryfast -crf 23 -pix_fmt yuv420p -movflags +faststart "$out"
-              rm -f "$f"; ls -la "$out"
+              ffmpeg -loglevel error -y $opts -ss "$s" -to "$e" -i "$src" -an -c:v libx264 -preset veryfast -crf 23 -pix_fmt yuv420p -movflags +faststart "$out" 2>>$LOG \
+                && ls -la "$out" >> $LOG || echo "FAIL $out" >> $LOG
             done
           done
+          cat $LOG
       - name: Сохранить
         run: |
           git config user.name "autoposter"
