@@ -44,8 +44,11 @@ def main():
         for d in m.DAYS:
             global PILL; PILL = d.get("pill", "СЕГОДНЯ В 19:00")
             out = ROOT / "media" / d["date"]; out.mkdir(parents=True, exist_ok=True)
-            for name, key, ph, topic in (("story_1_wish", "wish", "wish_photo", False), ("story_2_topic", "topic", "topic_photo", True)):
-                pg.set_content(f"<html><head><meta charset='utf-8'><style>{fonts}{CSS}</style></head><body>{story(*d[ph], *d[key], topic)}</body></html>")
+            items = [(f"story_{i+1}", st["text"], st["photo"], st.get("pill", False)) for i, st in enumerate(d["stories"])] if "stories" in d else \
+                    [("story_1_wish", d["wish"], d["wish_photo"], False), ("story_2_topic", d["topic"], d["topic_photo"], True)]
+            for name, text, photo, topic in items:
+                d.setdefault(name, None)
+                pg.set_content(f"<html><head><meta charset='utf-8'><style>{fonts}{CSS}</style></head><body>{story(*photo, *text, topic)}</body></html>")
                 pg.evaluate("document.fonts.ready"); pg.evaluate(FIT)
                 pg.screenshot(path=str(out / f"{name}.jpg"), type="jpeg", quality=92, clip={"x": 0, "y": 0, "width": 1080, "height": 1920}); n += 1
         br.close()
