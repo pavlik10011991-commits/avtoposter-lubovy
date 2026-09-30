@@ -4,11 +4,18 @@ import json, os, subprocess, sys
 import requests
 
 base = f"https://api.telegram.org/bot{os.environ['TG_BOT_TOKEN']}"
-r = requests.get(f"{base}/getUpdates", params={"allowed_updates": json.dumps(["business_connection"]), "timeout": 0}, timeout=30).json()
-print("updates:", len(r.get("result", [])), "types:", sorted({k for u in r.get("result", []) for k in u if k != "update_id"}))
-if not r.get("ok"):
-    print("Ошибка Telegram:", r.get("description")); sys.exit(1)
-conns = [u["business_connection"] for u in r["result"] if "business_connection" in u]
+import time
+conns, offset, deadline = [], None, time.time() + 150
+while time.time() < deadline and not conns:
+    params = {"allowed_updates": json.dumps(["business_connection"]), "timeout": 25}
+    if offset: params["offset"] = offset
+    r = requests.get(f"{base}/getUpdates", params=params, timeout=40).json()
+    if not r.get("ok"):
+        print("Ошибка Telegram:", r.get("description")); sys.exit(1)
+    for u in r["result"]:
+        offset = u["update_id"] + 1
+        if "business_connection" in u: conns.append(u["business_connection"])
+    print("жду подключение… получено обновлений:", len(r["result"]))
 if not conns:
     print("Подключений не найдено. В Телеграме: Настройки → Telegram для бизнеса → Чат-боты → добавьте бота "
           "и разрешите «Управление историями». Затем запустите снова (в течение суток).")
