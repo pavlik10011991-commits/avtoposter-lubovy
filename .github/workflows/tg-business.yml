@@ -1,0 +1,15 @@
+name: Подключить сторис в личный Телеграм
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  connect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -q requests
+      - env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: python publisher/tg_business_connect.py

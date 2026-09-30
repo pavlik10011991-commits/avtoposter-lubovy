@@ -291,8 +291,27 @@ class TelegramBot:
 
 # ───────────────────────── Телеграм: сторис канала ─────────────────────────
 
+def tg_story_business(it: Item) -> str:
+    """Сторис в личный профиль через бота, подключённого в Telegram Business (право «Управление историями»)."""
+    bot = TelegramBot()
+    m = it.media[0]
+    if m.suffix.lower() in VID:
+        dur, _, _ = video_meta(m)
+        content = {"type": "video", "video": "attach://story", "duration": dur}
+    else:
+        content = {"type": "photo", "photo": "attach://story"}
+    data = {"business_connection_id": os.environ["TG_BUSINESS_CONN"], "content": json.dumps(content), "active_period": 86400}
+    if it.text:
+        data |= {"caption": it.text[:2048]}
+    with m.open("rb") as f:
+        bot.call("postStory", data, files={"story": f})
+    return ""
+
+
 def tg_story(it: Item) -> str:
-    """Сторис в канал публикуется от имени администратора (бот этого не умеет)."""
+    """Сторис: через бизнес-подключение бота (TG_BUSINESS_CONN) или от имени аккаунта через Telethon."""
+    if os.environ.get("TG_BUSINESS_CONN", "").strip():
+        return tg_story_business(it)
     from telethon import TelegramClient
     from telethon.sessions import StringSession
     from telethon.tl import functions, types

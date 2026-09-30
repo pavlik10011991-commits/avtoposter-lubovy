@@ -36,6 +36,7 @@ jobs:
       TG_API_ID: ${{ secrets.TG_API_ID }}
       TG_API_HASH: ${{ secrets.TG_API_HASH }}
       TG_SESSION: ${{ secrets.TG_SESSION }}
+      TG_BUSINESS_CONN: ${{ secrets.TG_BUSINESS_CONN }}
       IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
       IG_USER_ID: ${{ vars.IG_USER_ID || secrets.IG_USER_ID }}
       MEDIA_BASE_URL: ${{ vars.MEDIA_BASE_URL }}
