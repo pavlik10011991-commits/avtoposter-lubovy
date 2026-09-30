@@ -248,6 +248,9 @@ class TelegramBot:
         body = md_to_html(it.text)
         base = {"chat_id": self.chat, "parse_mode": "HTML"}
         media = [m for m in it.media if m.suffix.lower() in IMG | VID]
+        vids = [m for m in media if m.suffix.lower() in VID]
+        if len(vids) == 1:
+            media = vids  # одно видео (рилс): картинки из строки идут ему обложкой, а не отдельным альбомом
         caption_fits = len(body) <= 1024
         cap = body if caption_fits else ""
         if not media:
@@ -256,10 +259,16 @@ class TelegramBot:
         if len(media) == 1:
             m = media[0]
             kind = "video" if m.suffix.lower() in VID else "photo"
+            extra, files = {}, {}
+            if kind == "video":
+                dur, w, h = video_meta(m)
+                extra = {"supports_streaming": "true", "width": w, "height": h, "duration": int(round(dur))}
+                cover = next((x for x in it.media if x.suffix.lower() in IMG), None)
+                if cover:
+                    files["thumbnail"] = cover.open("rb"); extra["thumbnail"] = "attach://thumbnail"
             with m.open("rb") as f:
-                res = self.call("sendVideo" if kind == "video" else "sendPhoto",
-                                {**base, "caption": cap, **({"supports_streaming": "true"} if kind == "video" else {})},
-                                files={kind: f})
+                files[kind] = f
+                res = self.call("sendVideo" if kind == "video" else "sendPhoto", {**base, "caption": cap, **extra}, files=files)
             first = res["message_id"]
         else:
             files, group = {}, []
@@ -267,6 +276,9 @@ class TelegramBot:
                 name = f"f{i}"
                 files[name] = m.open("rb")
                 entry = {"type": "video" if m.suffix.lower() in VID else "photo", "media": f"attach://{name}"}
+                if m.suffix.lower() in VID:
+                    dur, w, h = video_meta(m)
+                    entry |= {"width": w, "height": h, "duration": int(round(dur)), "supports_streaming": True}
                 if i == 0 and cap:
                     entry |= {"caption": cap, "parse_mode": "HTML"}
                 group.append(entry)
