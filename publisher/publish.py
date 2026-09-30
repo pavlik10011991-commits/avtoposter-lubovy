@@ -303,7 +303,9 @@ def tg_story(it: Item) -> str:
         try:
             if not await client.is_user_authorized():
                 raise RuntimeError("сессия Телеграма недействительна — заново запустите login_telegram.py")
-            peer = await client.get_input_entity(env("TG_CHANNEL"))
+            # куда сторис: TG_STORY_PEER (по умолчанию «me» — личный профиль), иначе группа/канал
+            target = os.environ.get("TG_STORY_PEER", "me").strip() or "me"
+            peer = await client.get_input_entity(target)
             m = it.media[0]
             up = await client.upload_file(str(m))
             if m.suffix.lower() in VID:
