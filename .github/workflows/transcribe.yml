@@ -12,17 +12,19 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - run: pip install -q faster-whisper
+      - run: pip install -q faster-whisper && (which ffmpeg || sudo apt-get -qq install -y ffmpeg >/dev/null)
       - name: Расшифровка
         run: |
           cat > asr.py <<'PY'
-          import glob, json, os
+          import glob, json, os, subprocess, numpy as np
           from faster_whisper import WhisperModel
           m = WhisperModel("small", device="cpu", compute_type="int8")
           for f in glob.glob("media/**/voice*.m4a", recursive=True):
               out = f.rsplit(".", 1)[0] + ".words.json"
               if os.path.exists(out): continue
-              segs, _ = m.transcribe(f, language="ru", word_timestamps=True, vad_filter=False)
+              pcm = subprocess.run(["ffmpeg","-loglevel","error","-i",f,"-ac","1","-ar","16000","-f","s16le","-"],capture_output=True,check=True).stdout
+              audio = np.frombuffer(pcm, np.int16).astype(np.float32) / 32768.0
+              segs, _ = m.transcribe(audio, language="ru", word_timestamps=True, vad_filter=False)
               words = [{"w": w.word.strip(), "s": round(w.start, 2), "e": round(w.end, 2)} for s in segs for w in s.words]
               json.dump(words, open(out, "w"), ensure_ascii=False, indent=0)
               print(f, " ".join(x["w"] for x in words))
