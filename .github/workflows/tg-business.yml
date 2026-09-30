@@ -9,7 +9,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: pip install -q requests
-      - env:
+      - shell: bash
+        env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           GH_TOKEN: ${{ secrets.GH_PAT }}
-        run: python publisher/tg_business_connect.py
+        run: python publisher/tg_business_connect.py 2>&1 | tee out.txt; code=${PIPESTATUS[0]}; { echo "```"; cat out.txt; echo "```"; } >> "$GITHUB_STEP_SUMMARY"; exit $code

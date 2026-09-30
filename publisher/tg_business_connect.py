@@ -5,6 +5,7 @@ import requests
 
 base = f"https://api.telegram.org/bot{os.environ['TG_BOT_TOKEN']}"
 r = requests.get(f"{base}/getUpdates", params={"allowed_updates": json.dumps(["business_connection"]), "timeout": 0}, timeout=30).json()
+print("updates:", len(r.get("result", [])), "types:", sorted({k for u in r.get("result", []) for k in u if k != "update_id"}))
 if not r.get("ok"):
     print("Ошибка Telegram:", r.get("description")); sys.exit(1)
 conns = [u["business_connection"] for u in r["result"] if "business_connection" in u]
