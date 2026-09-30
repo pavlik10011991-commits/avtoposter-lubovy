@@ -1,0 +1,22 @@
+name: Вход в Телеграм (QR)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  login:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q "telethon>=1.36" qrcode
+      - name: QR-код — отсканируйте телефоном (Настройки → Устройства → Подключить устройство)
+        env:
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          TG_2FA: ${{ secrets.TG_2FA }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: python publisher/tg_qr_login.py
