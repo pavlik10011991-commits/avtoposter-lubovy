@@ -5,7 +5,7 @@ import requests
 
 base = f"https://api.telegram.org/bot{os.environ['TG_BOT_TOKEN']}"
 import time
-conns, offset, deadline = [], None, time.time() + 150
+conns, offset, deadline = [], None, time.time() + 900
 while time.time() < deadline and not conns:
     params = {"allowed_updates": json.dumps(["business_connection"]), "timeout": 25}
     if offset: params["offset"] = offset
