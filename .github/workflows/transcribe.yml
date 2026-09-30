@@ -15,7 +15,7 @@ jobs:
       - run: pip install -q faster-whisper
       - name: Расшифровка
         run: |
-          python - <<'PY'
+          cat > asr.py <<'PY'
           import glob, json, os
           from faster_whisper import WhisperModel
           m = WhisperModel("small", device="cpu", compute_type="int8")
@@ -27,7 +27,9 @@ jobs:
               json.dump(words, open(out, "w"), ensure_ascii=False, indent=0)
               print(f, " ".join(x["w"] for x in words))
           PY
-      - run: |
+          python asr.py > media/asr_log.txt 2>&1; tail -20 media/asr_log.txt; exit 0
+      - if: always()
+        run: |
           git config user.name "autoposter"; git config user.email "autoposter@users.noreply.github.com"
           git add media; git commit -qm "расшифровка голоса" || exit 0
           for i in 1 2 3; do git pull --rebase -q && git push -q && exit 0; sleep 5; done
