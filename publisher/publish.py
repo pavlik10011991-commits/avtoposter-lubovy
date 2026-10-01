@@ -156,7 +156,7 @@ def validate(it: Item) -> None:
     for m in it.media:
         if not m.exists():
             P(f"нет файла {m.relative_to(ROOT)}")
-        elif m.suffix.lower() not in IMG | VID:
+        elif m.suffix.lower() not in IMG | VID and not (it.platform == "telegram" and m.suffix.lower() == ".pdf"):
             P(f"{m.name}: неподдерживаемый тип файла")
         if it.platform == "instagram" and not m.relative_to(ROOT).as_posix().isascii():
             P(f"{m.name}: для Инстаграма путь к файлу должен быть латиницей")
@@ -247,6 +247,13 @@ class TelegramBot:
     def post(self, it: Item) -> str:
         body = md_to_html(it.text)
         base = {"chat_id": self.chat, "parse_mode": "HTML"}
+        docs = [m for m in it.media if m.suffix.lower() == ".pdf"]
+        if docs:  # файл-документ (лид-магнит): отправляем как документ с подписью
+            with docs[0].open("rb") as f:
+                res = self.call("sendDocument", {**base, "caption": body if len(body) <= 1024 else ""}, files={"document": f})
+            if len(body) > 1024:
+                self.call("sendMessage", {**base, "text": body})
+            return self.link(res["message_id"])
         media = [m for m in it.media if m.suffix.lower() in IMG | VID]
         vids = [m for m in media if m.suffix.lower() in VID]
         if len(vids) == 1:
