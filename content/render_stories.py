@@ -20,6 +20,9 @@ html,body{width:1080px;height:1920px;overflow:hidden;background:#000}
 .label{font:700 30px Montserrat;letter-spacing:.34em;text-transform:uppercase;margin-bottom:28px;color:#E6C9A0}
 .h{font-family:Oswald;font-weight:700;text-transform:uppercase;line-height:1;font-size:108px}
 .serif{font:italic 400 50px/1.3 'PT Serif';margin-top:32px;opacity:.95}
+.num{position:absolute;top:330px;left:0;right:0;text-align:center;font:italic 400 64px "PT Serif";color:#E6C9A0;opacity:.0}
+.nophoto .box{bottom:auto;top:52%;transform:translateY(-50%)}
+.nophoto .h{line-height:1.08}
 .pill{display:inline-block;margin-top:48px;padding:22px 50px;border:3px solid #F4ECDF;border-radius:80px;font:700 36px Montserrat;letter-spacing:.08em}
 """
 
@@ -29,10 +32,14 @@ def story(photo, pos, label, head, sub, topic):
     pill = f'<div class="pill">{PILL}</div>' if topic else ""
     if topic:
         sub = sub.replace(" · сегодня в 19:00", "").replace("сегодня в 19:00", "").replace(" · разбор в 19:00", "").strip(" ·")
-    bp = pos if " " in pos else "center " + pos
     serif = f'<div class="serif">{esc(sub)}</div>' if sub else ""
-    return f"""<div class="s"><div class="photo" style="background-position:{bp};background-image:url(data:image/jpeg;base64,{b64(PHOTO_DIR / photo)})"></div>
-<div class="shade"></div><div class="handle">{esc(brand.HANDLE)}</div>
+    if photo:
+        bp = pos if " " in pos else "center " + pos
+        bg = f'<div class="photo" style="background-position:{bp};background-image:url(data:image/jpeg;base64,{b64(PHOTO_DIR / photo)})"></div><div class="shade"></div>'
+    else:  # без фото: фирменный фон (pos = цвет акцента)
+        bg = f'<div class="photo" style="background:radial-gradient(120% 70% at 50% 0%,{pos} 0%,#2A211C 55%,#14100E 100%)"></div><div class="num">{esc(label)}</div>'
+    cls = "s" if photo else "s nophoto"
+    return f"""<div class="{cls}">{bg}<div class="handle">{esc(brand.HANDLE)}</div>
 <div class="box"><div class="label">{esc(label)}</div><div class="h" data-fit="{400 if topic else 380}">{esc(head)}</div>
 {serif}{pill}</div></div>"""
 
