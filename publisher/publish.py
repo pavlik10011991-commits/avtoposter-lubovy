@@ -327,10 +327,30 @@ def tg_story_business(it: Item) -> str:
     return ""
 
 
+def tg_story_manual(it: Item, why) -> str:
+    """Запасной вариант без Telegram Premium: бот присылает файл Любе в личку, она выкладывает сторис сама (2 касания)."""
+    admin = os.getenv("TG_ADMIN_CHAT_ID")
+    if not admin:
+        raise RuntimeError(f"сторис в личный ТГ не выложена ({why}), и TG_ADMIN_CHAT_ID не задан")
+    bot = TelegramBot(); m = it.media[0]
+    cap = "📲 Сторис для личного Телеграма — сохраните и выложите в истории.\n(автоматически не получилось: Telegram Premium не активен)"
+    with m.open("rb") as f:
+        if m.suffix.lower() in VID:
+            bot.call("sendVideo", {"chat_id": admin, "caption": cap, "supports_streaming": True}, files={"video": f})
+        else:
+            bot.call("sendDocument", {"chat_id": admin, "caption": cap}, files={"document": f})
+    return "отправлено Любе в личку"
+
+
 def tg_story(it: Item) -> str:
     """Сторис: через бизнес-подключение бота (TG_BUSINESS_CONN) или от имени аккаунта через Telethon."""
     if os.environ.get("TG_BUSINESS_CONN", "").strip():
-        return tg_story_business(it)
+        try:
+            return tg_story_business(it)
+        except Exception as e:  # нет Premium / бизнес-подключение отключено
+            return tg_story_manual(it, e)
+    if not os.environ.get("TG_SESSION", "").strip():
+        return tg_story_manual(it, "нет подключения")
     from telethon import TelegramClient
     from telethon.sessions import StringSession
     from telethon.tl import functions, types
