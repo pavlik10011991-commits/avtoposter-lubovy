@@ -14,7 +14,7 @@ CSS = """
 html,body{width:1080px;height:1920px;overflow:hidden;background:#000}
 .s{position:relative;width:1080px;height:1920px;overflow:hidden;color:#F4ECDF;font-family:Montserrat}
 .photo{position:absolute;inset:0;background-size:cover}
-.shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.35) 0%,rgba(0,0,0,0) 16%,rgba(0,0,0,0) 48%,rgba(0,0,0,.7) 70%,rgba(0,0,0,.95) 100%)}
+.shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.35) 0%,rgba(0,0,0,0) 16%,rgba(0,0,0,.05) 36%,rgba(0,0,0,.72) 52%,rgba(0,0,0,.9) 68%,rgba(0,0,0,.96) 100%)}
 .handle{position:absolute;top:150px;left:0;right:0;text-align:center;font:500 30px Montserrat;letter-spacing:.1em;opacity:.85}
 .box{position:absolute;left:80px;right:80px;bottom:300px;text-align:center}
 .label{font:700 30px Montserrat;letter-spacing:.34em;text-transform:uppercase;margin-bottom:28px;color:#E6C9A0}
