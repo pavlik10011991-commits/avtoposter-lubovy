@@ -26,14 +26,14 @@ const COURSES = [
 ];
 const COURSES_P = {...showDefaults, shots: COURSES, endTitle: 'Разберу, что ИИ сделает у вас', endSub: 'бесплатно · 15 минут · это не курс', endPhoto: 'lubov_04_park_coat.jpg'};
 const CLAUDE = [
-  {src:'lubov2_table_red_low.jpg',from:0,dur:2.8,focus:[0.4,0.3],tag:'ЗНАКОМО?',title:'Таблицы и отчёты — снова ночью?',sub:'а другие уже отдали это Claude'},
-  {src:'c1005_table.mp4',from:0,dur:3.2,zoom:[1.0,1.1],focus:[0.6,0.5],tag:'CLAUDE ВЕДЁТ ТАБЛИЦЫ',title:'17 листов с формулами',sub:'сам открыл таблицу и разобрался в ней'},
-  {src:'c1005_menu.mp4',from:0,dur:3.8,zoom:[1.0,1.06],focus:[0.5,0.5],title:'Сам выгружает в Excel',sub:'Файл → Скачать → Excel — я только смотрю'},
-  {src:'c1005_ans.mp4',from:0,dur:3.8,zoom:[1.0,1.08],focus:[0.3,0.6],title:'И объясняет каждую формулу',sub:'скидки, проценты, бонусы сотрудникам'},
-  {src:'lubov2_flat_lipstick.jpg',from:0,dur:3.2,focus:[0.5,0.3],tag:'≈ 2 000 ₽ В МЕСЯЦ',title:'Таблицы, Битрикс24, amoCRM, WB',sub:'предприниматели в России уже ведут это с Claude'},
-  {src:'lubov2_flat_jewelry.jpg',from:0,dur:2.8,focus:[0.5,0.3],tag:'БЕЗ РУТИНЫ',title:'Меньше рутины — меньше тревоги',sub:'вы ведёте бизнес, а не таблицы'},
+  {src:'lubov2_table_red_low.jpg',from:0,dur:5.3,focus:[0.4,0.3],tag:'ЗНАКОМО?',title:'Таблицы и отчёты — снова ночью?',sub:'а другие уже отдали это Claude'},
+  {src:'c1005_table.mp4',from:0,dur:3.6,zoom:[1.0,1.1],focus:[0.6,0.5],tag:'CLAUDE ВЕДЁТ ТАБЛИЦЫ',title:'17 листов с формулами',sub:'сам открыл таблицу и разобрался в ней'},
+  {src:'c1005_menu.mp4',from:0.6,dur:1.9,zoom:[1.0,1.06],focus:[0.5,0.5],title:'Сам выгружает в Excel',sub:'Файл → Скачать → Excel — я только смотрю'},
+  {src:'c1005_ans.mp4',from:0,dur:5.0,zoom:[1.0,1.08],focus:[0.3,0.6],title:'И объясняет каждую формулу',sub:'скидки, проценты, бонусы сотрудникам'},
+  {src:'lubov2_flat_lipstick.jpg',from:0,dur:6.6,focus:[0.5,0.3],tag:'≈ 2 000 ₽ В МЕСЯЦ',title:'Таблицы, Битрикс24, amoCRM, WB',sub:'предприниматели в России уже ведут это с Claude'},
+  {src:'lubov2_flat_jewelry.jpg',from:0,dur:1.9,focus:[0.5,0.3],tag:'БЕЗ РУТИНЫ',title:'Меньше рутины — меньше тревоги',sub:'вы ведёте бизнес, а не таблицы'},
 ];
-const CLAUDE_P = {...showDefaults, shots: CLAUDE, endTitle: 'Покажу и внедрю под вас', endSub: 'это не курс: демонстрация на ваших задачах, лично или в малой группе', cta: 'НАПИШИТЕ «ДЕМОНСТРАЦИЯ»', endPhoto: 'lubov2_hat_lamp.jpg', endDur: 3.8};
+const CLAUDE_P = {...showDefaults, shots: CLAUDE, endTitle: 'Покажу и внедрю под вас', endSub: 'это не курс: демонстрация на ваших задачах, лично или в малой группе', cta: 'НАПИШИТЕ «ДЕМОНСТРАЦИЯ»', endPhoto: 'lubov2_hat_lamp.jpg', endDur: 6.8, voice: 'voice_1005.m4a'};
 export const Root: React.FC = () => (<>
   <Composition id="Reel" component={Reel} durationInFrames={30*12} fps={30} width={1080} height={1920} defaultProps={reelSchemaDefaults} />
   <Composition id="Demo" component={Demo} durationInFrames={30*14} fps={30} width={1080} height={1920} defaultProps={demoDefaults} />
