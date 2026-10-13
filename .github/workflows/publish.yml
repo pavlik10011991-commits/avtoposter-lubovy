@@ -5,7 +5,7 @@ on:
     - cron: "*/15 * * * *"        # каждые 15 минут; выходит всё, у чего наступило время (GitHub может задержать на 5–15 мин)
   push:
     branches: [main]
-    paths: [plan.csv]              # новая строка в плане — сразу запускается цикл публикации
+    paths: [plan.csv, .github/loop.trigger]   # новая строка в плане или продление цикла — сразу запускается цикл публикации
   workflow_dispatch:
     inputs:
       mode:
@@ -86,11 +86,11 @@ jobs:
             python publisher/publish.py --check | grep -q "Дальше по расписанию: 0" && break
             sleep 240
           done
-          # время цикла вышло, а в плане ещё есть публикации — запускаем следующий цикл сами
+          # время цикла вышло, а в плане ещё есть публикации — продлеваем: пуш через GH_PAT запускает новый цикл
           if ! python publisher/publish.py --check | grep -q "Дальше по расписанию: 0"; then
-            curl -s -X POST -H "Authorization: Bearer $GH_PAT" -H "Accept: application/vnd.github+json" \
-              "https://api.github.com/repos/${{ github.repository }}/actions/workflows/publish.yml/dispatches" \
-              -d '{"ref":"main","inputs":{"mode":"publish-loop"}}' && echo "следующий цикл запущен"
+            date -u > .github/loop.trigger
+            git add .github/loop.trigger && git commit -qm "продление цикла"
+            for i in 1 2 3; do git pull --rebase -q && git push -q "https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}.git" HEAD:main && echo "следующий цикл запущен" && break; sleep 5; done
           fi
 
       - name: Сохранить журнал публикаций
