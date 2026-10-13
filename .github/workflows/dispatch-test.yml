@@ -1,0 +1,20 @@
+name: Проверка самозапуска
+on:
+  push:
+    branches: [main]
+    paths: [".github/dispatch-test.trigger"]
+permissions:
+  contents: write
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          code=$(curl -s -o out.txt -w "%{http_code}" -X POST -H "Authorization: Bearer $GH_PAT" -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/workflows/publish.yml/dispatches" -d '{"ref":"main","inputs":{"mode":"check"}}')
+          { echo "$(date -u) HTTP $code"; cat out.txt; echo; echo "pat_len=${#GH_PAT}"; } > media/dispatch_log.txt
+          git config user.name autoposter; git config user.email autoposter@users.noreply.github.com
+          git add media/dispatch_log.txt; git commit -qm "dispatch test"; git pull --rebase -q; git push -q
