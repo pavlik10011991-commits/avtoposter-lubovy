@@ -19,6 +19,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: autoposter
@@ -59,7 +60,7 @@ jobs:
         run: python publisher/publish.py --check
 
       - name: Публикация
-        if: github.event_name == 'schedule' || github.event.inputs.mode == 'publish'
+        if: github.event.inputs.mode == 'publish'
         env:
           ONLY_ID: ${{ github.event.inputs.only_id }}
         run: |
@@ -70,7 +71,7 @@ jobs:
           fi
 
       - name: Публикация по расписанию в течение 5,5 часов (publish-loop)
-        if: github.event.inputs.mode == 'publish-loop' || github.event_name == 'push'
+        if: github.event.inputs.mode == 'publish-loop' || github.event_name == 'push' || github.event_name == 'schedule'
         run: |
           git config user.name "autoposter"
           git config user.email "autoposter@users.noreply.github.com"
@@ -86,15 +87,16 @@ jobs:
             python publisher/publish.py --check | grep -q "Дальше по расписанию: 0" && break
             sleep 240
           done
-          # время цикла вышло, а в плане ещё есть публикации — продлеваем: пуш через GH_PAT запускает новый цикл
+          # время цикла вышло, а в плане ещё есть публикации — запускаем следующий цикл (workflow_dispatch от GITHUB_TOKEN разрешён)
           if ! python publisher/publish.py --check | grep -q "Дальше по расписанию: 0"; then
-            date -u > .github/loop.trigger
-            git add .github/loop.trigger && git commit -qm "продление цикла"
-            for i in 1 2 3; do git pull --rebase -q && git -c http.https://github.com/.extraheader= push -q "https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}.git" HEAD:main && echo "следующий цикл запущен" && break; sleep 5; done
+            curl -sS -o /dev/null -w "продление цикла: HTTP %{http_code}\n" -X POST \
+              -H "Authorization: Bearer ${{ github.token }}" -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${{ github.repository }}/actions/workflows/publish.yml/dispatches" \
+              -d '{"ref":"main","inputs":{"mode":"publish-loop"}}'
           fi
 
       - name: Сохранить журнал публикаций
-        if: always() && (github.event_name == 'schedule' || github.event.inputs.mode == 'publish')
+        if: always() && github.event.inputs.mode == 'publish'
         run: |
           git config user.name "autoposter"
           git config user.email "autoposter@users.noreply.github.com"
