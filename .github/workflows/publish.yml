@@ -90,7 +90,7 @@ jobs:
           if ! python publisher/publish.py --check | grep -q "Дальше по расписанию: 0"; then
             date -u > .github/loop.trigger
             git add .github/loop.trigger && git commit -qm "продление цикла"
-            for i in 1 2 3; do git pull --rebase -q && git push -q "https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}.git" HEAD:main && echo "следующий цикл запущен" && break; sleep 5; done
+            for i in 1 2 3; do git pull --rebase -q && git -c http.https://github.com/.extraheader= push -q "https://x-access-token:${GH_PAT}@github.com/${{ github.repository }}.git" HEAD:main && echo "следующий цикл запущен" && break; sleep 5; done
           fi
 
       - name: Сохранить журнал публикаций
